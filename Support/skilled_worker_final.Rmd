@@ -1,0 +1,99 @@
+---
+title: "Skilled_worker"
+author: "Aline" 
+editor: "Haozheyi"
+date: "April 13, 2020"
+output: html_document
+---
+## Note this is all for Recode VII for the indicators relevant to skilled health provider. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. c_sba_skilled
+1. Vraibles involved: birth: m3a-m3n
+2. Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife
+
+```{r c_sba}
+library(foreign)
+library(dplyr)
+common_path = "C:/Users/Guan/OneDrive/DHS/MEASURE UHC DATA/RAW DATA/Recode VII"
+primary_dirs = list.files(common_path)
+primary_dirs
+main_data = data.frame()
+
+for (dir in primary_dirs) {
+  birth <- list.files(paste(common_path,dir,sep = "/"),pattern = "*birth")
+ #there is a file with birth.dta in this directory read it in append to a data.frame
+  for (dta in birth) {
+  temp_data <- read.dta(paste(common_path,dir,sep="/",dta))
+  ctr <- unique(temp_data$v000)
+  temp_data <- as.data.frame(attr(temp_data,"var.labels"))
+  names(temp_data)<-"name"
+  temp_data<-filter(temp_data,grepl("^assistance:",temp_data$name,ignore.case = TRUE))%>%mutate(country = ctr)
+  main_data <- rbind(main_data,temp_data)
+  }
+}
+
+main_data$name<-tolower(main_data$name)
+main_data_2<-distinct(main_data)
+
+skilled <- c("doctor","nurse","midwife","mifwife","aide soignante","assistante accoucheuse","clinical officer","mch aide", "trained","auxiliary birth attendant","physician assistant","professional","ferdsher","feldshare","skilled","community health care provider","birth attendant","hospital/health center worker","hew","auxiliary","icds","feldsher","mch","vhw","village health team","health personnel","gynecolog(ist|y)","obstetrician","internist","pediatrician","family welfare visitor","medical assistant","health assistant","matron","general practitioner","trained traditional birth attendant","health officer","extension") 
+unskilled <- c("na^|-na","traditional birth attendant","untrained","unquallified","empirical midwife","box","community")
+#"na^", not in the list
+
+a<-grepl(main_data_2$name,pattern = paste(skilled,collapse = "|"),ignore.case = TRUE)
+b<-!grepl(main_data_2$name,pattern = paste(unskilled,collapse = "|"),ignore.case = TRUE)   
+
+main_data_2<- mutate(main_data_2,c_sba_skilled = ifelse(a&b,1,0))
+var_list_2<- distinct(select(main_data_2,1,3))
+
+paste(skilled,collapse = "|")
+paste(unskilled,collapse = "|")
+write.csv(var_list_2,"c_sba.csv")
+```
+
+
+
+## 2. c_diarrhea_pro
+```{r c_diarrhea_pro}
+library(foreign)
+common_path = "C:/Users/Guan/OneDrive/DHS/MEASURE UHC DATA/RAW DATA/Recode VII"
+primary_dirs = list.files(common_path)
+primary_dirs
+main_data = data.frame()
+
+for (dir in primary_dirs) {
+  birth <- list.files(paste(common_path,dir,sep = "/"),pattern = "*birth")
+ #there is a file with birth.dta in this directory read it in append to a data.frame
+  for (dta in birth) {
+  temp_data <- read.dta(paste(common_path,dir,sep="/",dta))
+  ctr <- unique(temp_data$v000)
+  temp_data <- as.data.frame(attr(temp_data,"var.labels"))
+  names(temp_data)<-"name"
+  temp_data<-filter(temp_data,grepl("^diarrhea:",temp_data$name,ignore.case = TRUE))%>%mutate(country = ctr)
+  main_data <- rbind(main_data,temp_data)
+  }
+}
+
+main_data$name<-tolower(main_data$name)
+main_data_2<-distinct(main_data)
+
+skilled <- c("other","shop","pharmacy","market","kiosk","relative","friend", "church","drug","addo","hilot","traditional","cs private medical","cs public sector","no treatment") 
+unskilled <- c("ngo","hospital","medical center","traditional practioner$","sub health center","health center","aid post","trained vhv and other government","maternity home","diagnostic center","wome('s|n's) consultation","(pol|po)yclinic","fap","emergency services","ambulatory/family doctor office")
+#"na^", not in the list
+
+a<-grepl(main_data_2$name,pattern = paste(skilled,collapse = "|"),ignore.case = TRUE)
+b<-!grepl(main_data_2$name,pattern = paste(unskilled,collapse = "|"),ignore.case = TRUE)   
+
+main_data_2<- mutate(main_data_2,c_diarrhea_pro = ifelse(a&b,0,1))
+var_list_2<- distinct(select(main_data_2,1,3))
+
+paste(skilled,collapse = "|")
+paste(unskilled,collapse = "|")
+write.csv(main_data_2,"c_diarrhea_pro.csv")
+```
+
+
+
