@@ -32,7 +32,7 @@
 	g c_diarrheaact_q = .
 		
 *c_fever	Child with a fever in last two weeks
-	gen c_fever = (h22 == 1) if !inlist(h22,.,8,9)
+	gen c_fever = .
 
 
 *c_sevdiarrhea	Child with severe diarrhea
@@ -56,24 +56,8 @@
 	gen c_treatARI =.
 	gen c_treatARI2 =.
 
-	    
-	order h32a-h32x,sequential	
-		
-	foreach var of varlist h32a-h32x {
-                 local lab: variable label `var' 
-        replace `var' = . if ///   				 
-		regexm("`lab'","(other|shop|pharmacy|market|kiosk|relative|friend|church|drug|addo|hilot|traditional|cs private medical|cs public sector|no treatment)") ///
-                 & !regexm("`lab'","(ngo|hospital|medical center|traditional practioner$|sub health center|health center|aid post|trained vhv and other government|maternity home|diagnostic center|wome('s|n's) consultation|(pol|po)yclinic|fap|emergency services|ambulatory/family doctor office)")  
-		replace `var' = . if !inlist(`var',0,1)
-                 /* do not consider formal if contain words in the first group but don't contain any words in the second group */
-      }
-	egen pro_ari = rowtotal(h32a-h32x),mi
-
 *c_fevertreat	Child with fever symptoms seen by formal provider	
-	gen c_fevertreat = 0 if c_fever == 1
-	replace c_fevertreat = 1 if c_fevertreat == 0 & pro_ari >= 1
-	replace c_fevertreat = . if pro_ari == .
-
+	gen c_fevertreat = .
 			
 *c_illness/c_illness2	Child with any illness symptoms in last two weeks
 	gen c_illness =.

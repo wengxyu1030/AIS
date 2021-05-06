@@ -4,7 +4,13 @@
 ******************************** 	
 
 ren v008 dateinterview
-ren b3_01 wdoblastchild
+capture confirm variable b3_01
+if _rc == 0 {
+	ren b3_01 wdoblastchild
+}
+if _rc != 0 {
+	g wdoblastchild=.
+}
 rename v213 wpregnant
 
 *w_bmi_1549	15-49y woman's BMI      

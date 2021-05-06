@@ -4,39 +4,21 @@
 
 
 	*c_anc: 4+ antenatal care visits of births in last 2 years	
-	capture confirm variable m14
-	if _rc == 0 {
-		gen c_anc = (inrange(m14,4,97)) if m14<=97                                                //Last pregnancies in last 2 years of women currently aged 15-49	 
-		replace c_anc=0 if m2n ==1 & m14>=98 
-	}
-	if _rc != 0 {
-		gen c_anc = .                //Children under 5 in country where malaria is endemic (only in countries with endemic)
-	}		
-		
+	gen c_anc = (inrange(m14,4,97)) if m14<=97                                                //Last pregnancies in last 2 years of women currently aged 15-49	 
+	replace c_anc=0 if m2n ==1 & m14>=98 
+	
 	*c_anc_any: any antenatal care visits of births in last 2 years
-	capture confirm variable m14
-	if _rc == 0 {
-		gen c_anc_any = (inrange(m14,1,97)) if m14<=97                //Children under 5 in country where malaria is endemic (only in countries with endemic)
-	}
-	if _rc != 0 {
-		gen c_anc_any = .                //Children under 5 in country where malaria is endemic (only in countries with endemic)
-	}	
+	gen c_anc_any = (inrange(m14,1,97)) if m14<=97
+	
 	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
-	capture confirm variable m13
-	if _rc == 0 {
-		gen c_anc_ear = 0 if m2n!=.   // filter question, m13 based on Women who had seen someone for antenatal care for their last born child
-		replace c_anc_ear = 1 if inrange(m13,0,3)
-		replace c_anc_ear = . if inlist(m13,98,.) & m2n !=1 
-	}
-	if _rc != 0 {
-		gen c_anc_ear = .                //Children under 5 in country where malaria is endemic (only in countries with endemic)	
-	}
+	gen c_anc_ear = 0 if m2n!=.   // filter question, m13 based on Women who had seen someone for antenatal care for their last born child
+	replace c_anc_ear = 1 if inrange(m13,0,3)
+	replace c_anc_ear = . if inlist(m13,98,.) & m2n !=1 
+	
 	*c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
 	gen c_anc_ear_q = c_anc_ear if c_anc_any==1
-	
-	 
+		 
 	 *anc_skill: Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife...
-
 	foreach var of varlist m2a-m2m {
 
 	local lab: variable label `var' 
@@ -48,9 +30,7 @@
 	replace `var' = . if !inlist(`var',0,1)
 
 	 }
-	if inlist(name, "Uganda2018") {
-		replace m2d = .  // exclude "nursing aide/assistant"
-	}
+
 	/* do consider as skilled if contain words in the first group but don't contain any words in the second group */
     egen anc_skill = rowtotal(m2a-m2m),mi
 
@@ -150,16 +130,6 @@ Attach Recode VII 1_antenatal_care.do as reference
 
 	replace `var' = . if !inlist(`var',0,1)
 
-	 }
-	if inlist(name, "Senegal2017") {
-		replace m2h = .
-	}
-	if inlist(name, "Benin2017") {
-		replace m2h = . // exclude "untrained birth attendant"
-	}
-	if inlist(name,"Nepal2016") {
-		replace m2d = .  // Nepal doesn't include health assistant in the report.
-	}	
 	/* do consider as skilled if contain words in the first group but don't contain any words in the second group */
 
     egen anc_skill = rowtotal(m2a-m2m),mi
@@ -238,11 +208,6 @@ Attach Recode VII 1_antenatal_care.do as reference
 	    label var rh_anc_neotet "Protected against neonatal tetanus"
 		
 	gen c_anc_tet = (rh_anc_neotet == 1) if  !mi(rh_anc_neotet)
-	
-	if inlist(name,"Bangladesh2017"){
-		replace c_anc_tet=.
-		replace rh_anc_neotet =.
-	}
 	
 	*c_anc_tet_q: pregnant women vaccinated against tetanus among ANC users for last birth in last 2 years
 	gen c_anc_tet_q = (rh_anc_neotet == 1) if c_anc_any == 1

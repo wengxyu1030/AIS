@@ -22,7 +22,7 @@ macro drop _all
 global root "/Users/xianzhang/Dropbox/DHS"
 
 * Define path for data sources
-global SOURCE "/Volumes/alan/DHS/RAW DATA/MIS"
+global SOURCE "/Volumes/alan/DHS/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -31,20 +31,22 @@ global OUT "${root}/STATA/DATA/SC/FINAL"
 global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "${root}/STATA/DO/SC/DHS/MIS-recode-template"
+global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
 
 * Define the country names (in globals) in by Recode
     
 do "${DO}/0_GLOBAL.do"
 	
-foreach name in BurkinaFaso2017 {	
+foreach name in Coted'Ivoire2005{	
 clear
-tempfile birth ind men hm hiv hh iso birthind
+tempfile birth ind men hm hiv hh iso birthind 
 
 ******************************
 *****domains using birth data*
 ******************************
 use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+capture confirm variable b1_01
+if _rc == 0 {
 	foreach k in 1 2 3 4 5 6 7 8 9  {
 		foreach var of varlist *_0`k' {
 			local a =  subinstr("`var'","_0`k'","_`k'",1)
@@ -66,6 +68,7 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	}
 	
 	drop if b8==. & b5!=0
+	label value m15 m15_1
 	
 save `birthind',replace
 
@@ -101,9 +104,52 @@ save `birthind',replace
     *hm_doi	date of interview (cmc)
     gen hm_doi = v008
 	
+	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
+	if inlist(name,"Coted'Ivoire2005"){
+		gen hm_shstruct = substr(caseid,8,3)
+		order caseid bidx v000 v001 v002 hm_shstruct  v003
+		destring hm_shstruct v002,replace
+	}	
+	cap gen hm_shstruct =999
 rename (v001 v002 b16) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_*
+
 save `birth'
+}
+if _rc != 0 { // some survey have no child data, generate all child related variables as missing 
+use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+	local varlist c_anc	c_anc_any	c_anc_bp	c_anc_bp_q	c_anc_bs	c_anc_bs_q	c_anc_ear	c_anc_ear_q	c_anc_eff	c_anc_eff_q	///	
+	c_anc_eff2	c_anc_eff2_q	c_anc_eff3	c_anc_eff3_q	c_anc_ir	c_anc_ir_q	c_anc_ski	c_anc_ski_q	c_anc_tet	c_anc_tet_q	///
+	c_anc_ur c_anc_ur_q	c_caesarean	c_earlybreast	c_facdel	c_hospdel	c_sba	c_sba_eff1	c_sba_eff1_q	c_sba_eff2	///
+	c_sba_eff2_q c_sba_q	c_skin2skin	c_pnc_any	c_pnc_eff	c_pnc_eff_q	c_pnc_eff2	c_pnc_eff2_q	c_bcg	c_dpt1	c_dpt2	///
+	c_dpt3	c_fullimm c_measles c_polio1	c_polio2	c_polio3	c_ari	c_ari2	c_diarrhea 	c_diarrhea_hmf	c_diarrhea_med ///	
+	c_diarrhea_medfor c_diarrhea_mof	c_diarrhea_pro	c_diarrheaact	c_diarrheaact_q	c_fever	c_fevertreat	c_illness	c_illtreat ///
+	c_sevdiarrhea c_sevdiarrheatreat	c_sevdiarrheatreat_q	c_treatARI	c_treatARI2	c_treatdiarrhea	c_illness2	c_illtreat2  ///
+	mor_ade	mor_afl	mor_ali	mor_dob mor_wln bidx  hm_age_mon c_ITN
+	
+	foreach i of local varlist{
+			gen `i' = . 
+	}
+	gen w_sampleweight = v005/10e6
+	
+	recode v106 (0 = 1) (1 =2) (2/3 = 3) (8 = .),gen(w_mateduc)
+	label define w_label 1 "none" 2 "primary" 3 "lower sec or higher"
+	label values w_mateduc w_label
+	
+	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
+	gen name = "`name'"
+
+	if inlist(name,"Coted'Ivoire2005"){
+		gen hm_shstruct = substr(caseid,8,3)
+		order caseid  v000 v001 v002 hm_shstruct v003
+		destring hm_shstruct v002,replace
+		isid v001 hm_shstruct v002 v003  
+	}	
+	cap gen hm_shstruct =999
+rename (v001 v002 v003) (hv001 hv002 hvidx)
+keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_shstruct
+save `birth'	
+}
 
 ******************************
 *****domains using ind data***
@@ -134,6 +180,13 @@ gen name = "`name'"
 	do "${DO}/13_adult"
     do "${DO}/14_demographics"
 	
+	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
+	if inlist(name,"Coted'Ivoire2005"){
+		gen hm_shstruct = shstruct
+		isid hm_shstruct hv001 hv002 hvidx
+		order  hhid hvidx hv000 hm_shstruct hv001 hv002
+	}	
+	cap gen hm_shstruct =999
 keep hv001 hv002 hvidx hc70 hc71 ///
 c_* ant_* a_* hm_* ln
 save `hm'
@@ -141,28 +194,55 @@ save `hm'
 capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
  if _rc==0 {
     use "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta", clear
+	gen name = "`name'"
     do "${DO}/12_hiv"
  }
  if _rc!= 0 {
     gen a_hiv = . 
     gen a_hiv_sampleweight = .
-  }   
+  }
+ 	cap gen hm_shstruct =999 
     save `hiv'
 
 use `hm',clear
-merge 1:1 hv001 hv002 hvidx using `hiv'
+merge 1:1 hv001 hm_shstruct hv002 hvidx using `hiv'
 drop _merge
 save `hm',replace
 
 ************************************
 *****domains using hh level data****
 ************************************
+if !inlist(name,"Coted'Ivoire2005"){
 use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
-    rename (hv001 hv002 hvidx) (v001 v002 v003)
+/*    rename (hv001 hv002 hvidx) (v001 v002 v003)
 
     merge 1:m v001 v002 v003 using `birthind'
     rename (v001 v002 v003) (hv001 hv002 hvidx) 
     drop _merge
+*/
+	cap gen hm_shstruct =999 
+	gen name = "`name'"
+}
+
+* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
+if inlist(name,"Coted'Ivoire2005"){
+	tempfile birthspec
+	use `birthind',clear
+	gen hm_shstruct = substr(caseid,8,3)
+	order  caseid bidx v000 hm_shstruct v001 v002 v003
+	save `birthspec',replace
+	
+	use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+	gen hm_shstruct = shstruct
+	isid hm_shstruct hv001 hv002 hvidx
+	order  hhid hvidx hv000 hm_shstruct hv001 hv002 
+    rename (hv001 hv002 hvidx) (v001 v002 v003)
+
+    merge 1:m v001 v002 hm_shstruct v003 using `birthspec'
+    rename (v001 v002 v003) (hv001 hv002 hvidx) 
+    drop _merge
+	gen name = "`name'"
+}
 
     do "${DO}/15_household"
 
@@ -211,7 +291,7 @@ use `hm',clear
 	drop _merge
 
 *** Quality Control: Validate with DHS official data
-    gen surveyid = iso2c+year+"MIS"
+    gen surveyid = iso2c+year+"AIS"
 
 	preserve 
 	do "${DO}/Quality_control"

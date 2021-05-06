@@ -11,7 +11,10 @@ the existance of the hiv data */
     ren hivnumb hv002
     ren hivline hvidx
     ren hiv03 a_hiv_cat
-
+	
+	if inlist(name,"Coted'Ivoire2005"){
+		ren hivstruct hm_shstruct
+	}	
     *a_hiv	15-49 household member (female or male) tested positive for HIV1 or HIV2 (1/0)
     gen a_hiv=.
     replace a_hiv=1 if a_hiv_cat==1|a_hiv_cat==2|a_hiv_cat==3

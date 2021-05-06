@@ -3,8 +3,8 @@ clear
 macro drop _all
 
 
-foreach name in Angola2011 BurkinaFaso2014 BurkinaFaso2017 Uganda2014 Uganda2018 {
-use "/Volumes/alan/DHS/RAW DATA/MIS/DHS-`name'/DHS-`name'ind.DTA",clear
+foreach name in Congo2019 Coted'Ivoire2005 Vietnam2005 {
+use "/Volumes/alan/DHS/RAW DATA/AIS/DHS-`name'/DHS-`name'ind.DTA",clear
 foreach i in 1 2 3 4 5 6 7 8 9  {
 foreach var of varlist *_0`i' {
 local a =  subinstr("`var'","_0`i'","_`i'",1)
@@ -25,14 +25,14 @@ foreach var of varlist *_{
 	ren `var' `a'
 }
 
-save "/Volumes/alan/DHS/RAW DATA/MIS/DHS-`name'/birth.dta",replace
+save "/Volumes/alan/DHS/RAW DATA/AIS/DHS-`name'/birth.dta",replace
 
 }
 
 
 cls
-foreach name in  Uganda2014{
-use "/Volumes/alan/DHS/RAW DATA/MIS/DHS-`name'/birth.dta",clear
+foreach name in  Vietnam2005{
+use "/Volumes/alan/DHS/RAW DATA/AIS/DHS-`name'/DHS-`name'ind.dta",clear
 lookfor m13 m14 m2 m2n m42 m45 m1a m1d
 lookfor m3 m15 m34 m4 m77 m61 m17 
 lookfor m50 m51 m52 m62 m63 m64 m66 m67 m68 m70 m71 m72 m74 m75 m77
