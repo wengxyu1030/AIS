@@ -37,7 +37,7 @@ global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
     
 do "${DO}/0_GLOBAL.do"
 	
-foreach name in Coted'Ivoire2005{	
+foreach name in Congo2019 Coted'Ivoire2005{	
 clear
 tempfile birth ind men hm hiv hh iso birthind 
 
@@ -70,8 +70,12 @@ if _rc == 0 {
 	drop if b8==. & b5!=0
 	label value m15 m15_1
 	
-save `birthind',replace
+save "${INTER}/`name'birth.dta",replace
+}
 
+capture confirm file "${INTER}/`name'birth.dta"
+if _rc == 0 {
+use "${INTER}/`name'birth.dta",clear
     gen hm_age_mon = (v008 - b3)           //hm_age_mon Age in months (children only)
     gen name = "`name'"
 	
@@ -108,14 +112,14 @@ save `birthind',replace
 	if inlist(name,"Coted'Ivoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid bidx v000 v001 v002 hm_shstruct  v003
-		destring hm_shstruct v002,replace
+		destring hm_shstruct,replace
 	}	
 	cap gen hm_shstruct =999
 rename (v001 v002 b16) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_*
-
-save `birth'
+save `birth',replace
 }
+capture confirm file "${INTER}/`name'birth.dta"
 if _rc != 0 { // some survey have no child data, generate all child related variables as missing 
 use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	local varlist c_anc	c_anc_any	c_anc_bp	c_anc_bp_q	c_anc_bs	c_anc_bs_q	c_anc_ear	c_anc_ear_q	c_anc_eff	c_anc_eff_q	///	
@@ -142,13 +146,13 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	if inlist(name,"Coted'Ivoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid  v000 v001 v002 hm_shstruct v003
-		destring hm_shstruct v002,replace
+		destring hm_shstruct,replace
 		isid v001 hm_shstruct v002 v003  
 	}	
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_shstruct
-save `birth'	
+save `birth',replace
 }
 
 ******************************
@@ -165,6 +169,14 @@ gen name = "`name'"
     *hm_dob	date of birth (cmc)
     gen hm_dob = v011  
 	
+	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
+	if inlist(name,"Coted'Ivoire2005"){
+		gen hm_shstruct = substr(caseid,8,3)
+		order caseid  v000 v001 v002 hm_shstruct v003
+		destring hm_shstruct,replace
+		isid v001 hm_shstruct v002 v003  
+	}	
+	cap gen hm_shstruct =999	
 	
 keep v001 v002 v003 w_* hm_*
 rename (v001 v002 v003) (hv001 hv002 hvidx)
@@ -202,7 +214,7 @@ capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
     gen a_hiv_sampleweight = .
   }
  	cap gen hm_shstruct =999 
-    save `hiv'
+    save `hiv',replace
 
 use `hm',clear
 merge 1:1 hv001 hm_shstruct hv002 hvidx using `hiv'
@@ -212,42 +224,17 @@ save `hm',replace
 ************************************
 *****domains using hh level data****
 ************************************
-if !inlist(name,"Coted'Ivoire2005"){
 use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
-/*    rename (hv001 hv002 hvidx) (v001 v002 v003)
-
-    merge 1:m v001 v002 v003 using `birthind'
-    rename (v001 v002 v003) (hv001 hv002 hvidx) 
-    drop _merge
-*/
-	cap gen hm_shstruct =999 
 	gen name = "`name'"
-}
-
-* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
-if inlist(name,"Coted'Ivoire2005"){
-	tempfile birthspec
-	use `birthind',clear
-	gen hm_shstruct = substr(caseid,8,3)
-	order  caseid bidx v000 hm_shstruct v001 v002 v003
-	save `birthspec',replace
-	
-	use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
-	gen hm_shstruct = shstruct
-	isid hm_shstruct hv001 hv002 hvidx
-	order  hhid hvidx hv000 hm_shstruct hv001 hv002 
-    rename (hv001 hv002 hvidx) (v001 v002 v003)
-
-    merge 1:m v001 v002 hm_shstruct v003 using `birthspec'
-    rename (v001 v002 v003) (hv001 hv002 hvidx) 
-    drop _merge
-	gen name = "`name'"
-}
-
+	if inlist(name,"Coted'Ivoire2005"){
+		gen hm_shstruct = shstruct
+		isid hm_shstruct hv001 hv002 hvidx
+		order  hhid hvidx hv000 hm_shstruct hv001 hv002
+	}	
     do "${DO}/15_household"
-
-keep hv001 hv002 hv003 hh_* ind_*
-save `hh' 
+	cap gen hm_shstruct =999 
+keep hv001 hv002 hv003 hh_* ind_* hm_shstruct
+save `hh' ,replace
 
 ************************************
 *****merge to microdata*************
@@ -265,16 +252,17 @@ save `iso'
 ***merge all subset of microdata
 use `hm',clear
 
-    merge 1:m hv001 hv002 hvidx using `birth',update      //DHSsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
-	bysort hv001 hv002: egen min = min(w_sampleweight)
+    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //DHSsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
+	
+	bysort hv001 hm_shstruct hv002: egen min = min(w_sampleweight)
 	replace w_sampleweight = min if w_sampleweight ==.
     replace hm_headrel = 99 if _merge == 2
 	label define hm_headrel_lab 99 "dead/no longer in the household"
 	label values hm_headrel hm_headrel_lab
 	replace hm_live = 0 if _merge == 2 | inlist(hm_headrel,.,12,98)
 	drop _merge
-    merge m:m hv001 hv002 hvidx using `ind',nogen update
-	merge m:m hv001 hv002       using `hh',nogen update
+    merge m:m hv001 hm_shstruct hv002 hvidx using `ind',nogen update
+	merge m:m hv001 hm_shstruct hv002       using `hh',nogen update
 
     tab hh_urban,mi  //check whether all hh member + dead child + child lives outside hh assinged hh info
 
@@ -351,8 +339,3 @@ use `hm',clear
 	
 save "${OUT}/DHS-`name'.dta", replace  
 }
-
-
-
-
-
