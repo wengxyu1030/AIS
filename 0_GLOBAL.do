@@ -10,8 +10,17 @@
 #delimit ;
 global AIScountries
 "
-
- 
+Congo2009
+Coted'Ivoire2005
+Guyana2005
+Mozambique2015
+Mozambique2009
+Tanzania2011
+Tanzania2007
+Tanzania2003
+Uganda2011
+Uganda2004
+Vietnam2005
 ";
 #delimit cr
 
@@ -23,8 +32,43 @@ global AIScountries
 #delimit ;
 global MIScountries
 "
-
- 
+Angola2011
+Angola2006
+BurkinaFaso2017
+BurkinaFaso2014
+Burundi2012
+Cameroon2020
+Ghana2019
+Ghana2016
+Guinea2020
+Kenya2020
+Kenya2015
+Kenya2010
+Liberia2016
+Liberia2011
+Liberia2009
+Madagascar2016
+Madagascar2013
+Madagascar2011
+Malawi2017
+Malawi2014
+Malawi2012
+Mali2015
+Mozambique2018
+Nigeria2015
+Nigeria2010
+Rwanda2017
+Rwanda2013
+Senegal2020
+Senegal2008
+Senegal2006
+SierraLeone2016
+SierraLeone2013
+Tanzania2017
+Togo2017
+Uganda2018
+Uganda2014
+Uganda2009
 ";
 #delimit cr
 

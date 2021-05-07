@@ -37,7 +37,7 @@ global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
     
 do "${DO}/0_GLOBAL.do"
 	
-foreach name in Congo2019 Coted'Ivoire2005{	
+foreach name in Coted'Ivoire2005{	
 clear
 tempfile birth ind men hm hiv hh iso birthind 
 
@@ -129,7 +129,7 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	c_dpt3	c_fullimm c_measles c_polio1	c_polio2	c_polio3	c_ari	c_ari2	c_diarrhea 	c_diarrhea_hmf	c_diarrhea_med ///	
 	c_diarrhea_medfor c_diarrhea_mof	c_diarrhea_pro	c_diarrheaact	c_diarrheaact_q	c_fever	c_fevertreat	c_illness	c_illtreat ///
 	c_sevdiarrhea c_sevdiarrheatreat	c_sevdiarrheatreat_q	c_treatARI	c_treatARI2	c_treatdiarrhea	c_illness2	c_illtreat2  ///
-	mor_ade	mor_afl	mor_ali	mor_dob mor_wln bidx  hm_age_mon c_ITN
+	mor_ade	mor_afl	mor_ali	mor_dob mor_wln bidx  hm_age_mon c_ITN hm_live hm_dob hm_age_yrs hm_male hm_doi 
 	
 	foreach i of local varlist{
 			gen `i' = . 
@@ -138,20 +138,10 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	
 	recode v106 (0 = 1) (1 =2) (2/3 = 3) (8 = .),gen(w_mateduc)
 	label define w_label 1 "none" 2 "primary" 3 "lower sec or higher"
-	label values w_mateduc w_label
-	
-	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	gen name = "`name'"
-
-	if inlist(name,"Coted'Ivoire2005"){
-		gen hm_shstruct = substr(caseid,8,3)
-		order caseid  v000 v001 v002 hm_shstruct v003
-		destring hm_shstruct,replace
-		isid v001 hm_shstruct v002 v003  
-	}	
+	label values w_mateduc w_label */
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
-keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_shstruct
+keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_*
 save `birth',replace
 }
 
@@ -230,9 +220,8 @@ use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
 		gen hm_shstruct = shstruct
 		isid hm_shstruct hv001 hv002 hvidx
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
-	}	
+	}		
     do "${DO}/15_household"
-	cap gen hm_shstruct =999 
 keep hv001 hv002 hv003 hh_* ind_* hm_shstruct
 save `hh' ,replace
 
@@ -246,7 +235,7 @@ keep country iso2c iso3c
 replace country = "Tanzania"  if country == "Tanzania, United Republic of"
 replace country = "PapuaNewGuinea" if country == "Papua New Guinea"
 replace country = "SierraLeone"  if country == "Sierra Leone"
-
+replace country = "Coted'Ivoire"  if country == "CÃ´te d'Ivoire"
 save `iso'
 
 ***merge all subset of microdata
@@ -273,8 +262,10 @@ use `hm',clear
     gen country = regexs(0) if regexm("`name'","([a-zA-Z]+)")
 	replace country = "South Africa" if country == "SouthAfrica"
 	replace country = "Timor-Leste" if country == "Timor"
+	replace country = "Coted'Ivoire" if country == "Coted"
 	
     merge m:1 country using `iso',force
+
     drop if _merge == 2
 	drop _merge
 
@@ -337,5 +328,9 @@ use `hm',clear
     drop bidx surveyid
     do "${DO}/Label_var"
 	
+capture confirm file "${INTER}/`name'birth.dta"
+if _rc == 0 {
+erase "${INTER}/`name'birth.dta"
+}
 save "${OUT}/DHS-`name'.dta", replace  
 }
