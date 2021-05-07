@@ -37,9 +37,9 @@ global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
     
 do "${DO}/0_GLOBAL.do"
 	
-foreach name in Coted'Ivoire2005{	
+foreach name in $AIScountries{	
 clear
-tempfile birth ind men hm hiv hh iso birthind 
+tempfile birth ind men hm hiv hh iso
 
 ******************************
 *****domains using birth data*
