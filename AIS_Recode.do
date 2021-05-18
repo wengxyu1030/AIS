@@ -19,23 +19,25 @@ macro drop _all
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
 //global root "C:\Users\wb500886\WBG\Sven Neelsen - World Bank\MEASURE UHC DATA"
-global root "/Users/xianzhang/Dropbox/DHS"
+global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "/Volumes/alan/DHS/RAW DATA/AIS"
+global SOURCE "/Users/sunyining/OneDrive/MEASURE UHC DATA/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
 
 * Define path for INTERMEDIATE
-global INTER "${root}/STATA/DATA/SC/INTER"
+global INTER "/Users/sunyining/OneDrive/MEASURE UHC DATA/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
+global DO "/Users/sunyining/Dropbox/GitHub/AIS"
 
 * Define the country names (in globals) in by Recode
     
 do "${DO}/0_GLOBAL.do"
+
+* global AIScountries "Congo2019"
 	
 foreach name in $AIScountries{	
 clear
@@ -138,7 +140,7 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	
 	recode v106 (0 = 1) (1 =2) (2/3 = 3) (8 = .),gen(w_mateduc)
 	label define w_label 1 "none" 2 "primary" 3 "lower sec or higher"
-	label values w_mateduc w_label */
+	label values w_mateduc w_label
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_*
