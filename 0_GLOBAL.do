@@ -11,7 +11,7 @@
 global AIScountries
 "
 Congo2009
-Coted'Ivoire2005
+CotedIvoire2005
 Guyana2005
 Mozambique2015
 Mozambique2009
