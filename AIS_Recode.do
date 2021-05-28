@@ -140,7 +140,7 @@ use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 	
 	recode v106 (0 = 1) (1 =2) (2/3 = 3) (8 = .),gen(w_mateduc)
 	label define w_label 1 "none" 2 "primary" 3 "lower sec or higher"
-	label values w_mateduc w_label 
+	label values w_mateduc w_label
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_*
