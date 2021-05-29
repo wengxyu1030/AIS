@@ -13,7 +13,8 @@
 	}
 
 	if inlist(name, "CotedIvoire2005") { 
-	replace c_ITN = (ml101 == 1) replace c_ITN = . if ml101 == . 
+	replace c_ITN = (ml101 == 1) 
+	replace c_ITN = . if ml101 == . 
 	}
 	
 *w_mateduc	Mother's highest educational level ever attended (1 = none, 2 = primary, 3 = lower sec or higher)
