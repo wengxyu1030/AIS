@@ -6,10 +6,10 @@
 *c_ITN	Child slept under insecticide-treated-bednet (ITN) last night.
     gen c_ITN = .
 	
-	capture confirm variable ml10
+	capture confirm variable ml0
 	if _rc == 0 {
-	replace c_ITN=(ml10==1) 								
-	replace c_ITN=. if ml10==.                  //Children under 5 in country where malaria is endemic (only in countries with endemic)
+	replace c_ITN=(ml0==1) 								
+	replace c_ITN=. if ml0==.                  //Children under 5 in country where malaria is endemic (only in countries with endemic)
 	}
 
 	if inlist(name, "CotedIvoire2005") { 
