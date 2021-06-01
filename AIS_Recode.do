@@ -34,10 +34,10 @@ global INTER "/Users/sunyining/OneDrive/MEASURE UHC DATA/STATA/DATA/SC/INTER"
 global DO "/Users/sunyining/Dropbox/GitHub/AIS"
 
 * Define the country names (in globals) in by Recode
-    
+
 do "${DO}/0_GLOBAL.do"
 
-* global AIScountries "Congo2019"
+global AIScountries "CotedIvoire2005"
 	
 foreach name in $AIScountries{	
 clear
@@ -46,7 +46,7 @@ tempfile birth ind men hm hiv hh iso
 ******************************
 *****domains using birth data*
 ******************************
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 capture confirm variable b1_01
 if _rc == 0 {
 	foreach k in 1 2 3 4 5 6 7 8 9  {
@@ -111,7 +111,7 @@ use "${INTER}/`name'birth.dta",clear
     gen hm_doi = v008
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid bidx v000 v001 v002 hm_shstruct  v003
 		destring hm_shstruct,replace
@@ -123,7 +123,7 @@ save `birth',replace
 }
 capture confirm file "${INTER}/`name'birth.dta"
 if _rc != 0 { // some survey have no child data, generate all child related variables as missing 
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 	local varlist c_anc	c_anc_any	c_anc_bp	c_anc_bp_q	c_anc_bs	c_anc_bs_q	c_anc_ear	c_anc_ear_q	c_anc_eff	c_anc_eff_q	///	
 	c_anc_eff2	c_anc_eff2_q	c_anc_eff3	c_anc_eff3_q	c_anc_ir	c_anc_ir_q	c_anc_ski	c_anc_ski_q	c_anc_tet	c_anc_tet_q	///
 	c_anc_ur c_anc_ur_q	c_caesarean	c_earlybreast	c_facdel	c_hospdel	c_sba	c_sba_eff1	c_sba_eff1_q	c_sba_eff2	///
@@ -150,7 +150,7 @@ save `birth',replace
 ******************************
 *****domains using ind data***
 ******************************
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear	
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear	
 gen name = "`name'"
 
     do "${DO}/4_sexual_health"
@@ -162,7 +162,7 @@ gen name = "`name'"
     gen hm_dob = v011  
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid  v000 v001 v002 hm_shstruct v003
 		destring hm_shstruct,replace
@@ -177,7 +177,7 @@ save `ind'
 ************************************
 *****domains using hm level data****
 ************************************
-use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'hm.dta", clear
 gen name = "`name'"
 
     do "${DO}/9_child_anthropometrics"  
@@ -185,7 +185,7 @@ gen name = "`name'"
     do "${DO}/14_demographics"
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = shstruct
 		isid hm_shstruct hv001 hv002 hvidx
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
@@ -195,9 +195,9 @@ keep hv001 hv002 hvidx hc70 hc71 ///
 c_* ant_* a_* hm_* ln
 save `hm'
 
-capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
+capture confirm file "${SOURCE}/AIS-`name'/AIS-`name'hiv.dta"
  if _rc==0 {
-    use "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta", clear
+    use "${SOURCE}/AIS-`name'/AIS-`name'hiv.dta", clear
 	gen name = "`name'"
     do "${DO}/12_hiv"
  }
@@ -216,9 +216,9 @@ save `hm',replace
 ************************************
 *****domains using hh level data****
 ************************************
-use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'hm.dta", clear
 	gen name = "`name'"
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = shstruct
 		isid hm_shstruct hv001 hv002 hvidx
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
@@ -237,7 +237,7 @@ keep country iso2c iso3c
 replace country = "Tanzania"  if country == "Tanzania, United Republic of"
 replace country = "PapuaNewGuinea" if country == "Papua New Guinea"
 replace country = "SierraLeone"  if country == "Sierra Leone"
-replace country = "Coted'Ivoire"  if country == "CÃ´te d'Ivoire"
+replace country = "CotedIvoire"  if country == "CÃ´te d'Ivoire"
 save `iso'
 
 ***merge all subset of microdata
@@ -264,7 +264,7 @@ use `hm',clear
     gen country = regexs(0) if regexm("`name'","([a-zA-Z]+)")
 	replace country = "South Africa" if country == "SouthAfrica"
 	replace country = "Timor-Leste" if country == "Timor"
-	replace country = "Coted'Ivoire" if country == "Coted"
+	replace country = "CotedIvoire" if country == "Coted"
 	
     merge m:1 country using `iso',force
 
