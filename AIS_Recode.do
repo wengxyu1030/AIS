@@ -18,23 +18,27 @@ macro drop _all
 
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
-//global root "C:\Users\wb500886\WBG\Sven Neelsen - World Bank\MEASURE UHC DATA"
-global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+* Define root depend on the stata user. 
+if "`c(username)'" == "sunyining" local pc = 0
+if "`c(username)'" == "xweng"     local pc = 1
+
+if `pc' == 0 global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+if `pc' == 1 global root "C:/Users/XWeng/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "/Users/sunyining/OneDrive/MEASURE UHC DATA/RAW DATA/AIS"
+global SOURCE "${root}/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
 
 * Define path for INTERMEDIATE
-global INTER "/Users/sunyining/OneDrive/MEASURE UHC DATA/STATA/DATA/SC/INTER"
+global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 0 global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 
 * Define the country names (in globals) in by Recode
-
 do "${DO}/0_GLOBAL.do"
 
 global AIScountries "CotedIvoire2005"
