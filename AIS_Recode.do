@@ -18,11 +18,15 @@ macro drop _all
 
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
-//global root "C:\Users\wb500886\WBG\Sven Neelsen - World Bank\MEASURE UHC DATA"
-global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+* Define root depend on the stata user. 
+if "`c(username)'" == "sunyining" local pc = 0
+if "`c(username)'" == "xweng"     local pc = 1
+
+if `pc' == 0 global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+if `pc' == 1 global root "C:/Users/XWeng/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "/Users/sunyining/OneDrive/MEASURE UHC DATA/RAW DATA/AIS"
+global SOURCE "${root}/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -31,10 +35,10 @@ global OUT "${root}/STATA/DATA/SC/FINAL"
 global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 0 global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 
 * Define the country names (in globals) in by Recode
-
 do "${DO}/0_GLOBAL.do"
 
 global AIScountries "Guyana2005"
@@ -113,7 +117,7 @@ use "${INTER}/`name'birth.dta",clear
     gen hm_doi = v008
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid bidx v000 v001 v002 hm_shstruct  v003
 		destring hm_shstruct,replace
@@ -164,7 +168,7 @@ gen name = "`name'"
     gen hm_dob = v011  
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = substr(caseid,8,3)
 		order caseid  v000 v001 v002 hm_shstruct v003
 		destring hm_shstruct,replace
@@ -187,7 +191,7 @@ gen name = "`name'"
     do "${DO}/14_demographics"
 	
 	* For Coted'Ivoire2005, the v001/v002 lost 2-3 digits, fix this issue in main.do
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = shstruct
 		isid hm_shstruct hv001 hv002 hvidx
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
@@ -220,7 +224,7 @@ save `hm',replace
 ************************************
 use "${SOURCE}/AIS-`name'/AIS-`name'hm.dta", clear
 	gen name = "`name'"
-	if inlist(name,"Coted'Ivoire2005"){
+	if inlist(name,"CotedIvoire2005"){
 		gen hm_shstruct = shstruct
 		isid hm_shstruct hv001 hv002 hvidx
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
@@ -239,7 +243,7 @@ keep country iso2c iso3c
 replace country = "Tanzania"  if country == "Tanzania, United Republic of"
 replace country = "PapuaNewGuinea" if country == "Papua New Guinea"
 replace country = "SierraLeone"  if country == "Sierra Leone"
-replace country = "Coted'Ivoire"  if country == "CÃ´te d'Ivoire"
+replace country = "CotedIvoire"  if country == "CÃ´te d'Ivoire"
 save `iso'
 
 ***merge all subset of microdata
@@ -266,7 +270,7 @@ use `hm',clear
     gen country = regexs(0) if regexm("`name'","([a-zA-Z]+)")
 	replace country = "South Africa" if country == "SouthAfrica"
 	replace country = "Timor-Leste" if country == "Timor"
-	replace country = "Coted'Ivoire" if country == "Coted"
+	replace country = "CotedIvoire" if country == "Coted"
 	
     merge m:1 country using `iso',force
 
