@@ -19,10 +19,10 @@ macro drop _all
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
 //global root "C:\Users\wb500886\WBG\Sven Neelsen - World Bank\MEASURE UHC DATA"
-global root "/Users/xianzhang/Dropbox/DHS"
+global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "/Volumes/alan/DHS/RAW DATA/AIS"
+global SOURCE "/Users/sunyining/OneDrive/MEASURE UHC DATA/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -31,11 +31,13 @@ global OUT "${root}/STATA/DATA/SC/FINAL"
 global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "${root}/STATA/DO/SC/DHS/AIS-Recode"
+global DO "/Users/sunyining/Dropbox/GitHub/AIS"
 
 * Define the country names (in globals) in by Recode
-    
+
 do "${DO}/0_GLOBAL.do"
+
+global AIScountries "Guyana2005"
 	
 foreach name in $AIScountries{	
 clear
@@ -44,7 +46,7 @@ tempfile birth ind men hm hiv hh iso
 ******************************
 *****domains using birth data*
 ******************************
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 capture confirm variable b1_01
 if _rc == 0 {
 	foreach k in 1 2 3 4 5 6 7 8 9  {
@@ -68,7 +70,10 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
+	gen name = "`name'"
+	if !inlist(name, "Guyana2005"){
 	label value m15 m15_1
+	}
 	
 save "${INTER}/`name'birth.dta",replace
 }
@@ -77,7 +82,6 @@ capture confirm file "${INTER}/`name'birth.dta"
 if _rc == 0 {
 use "${INTER}/`name'birth.dta",clear
     gen hm_age_mon = (v008 - b3)           //hm_age_mon Age in months (children only)
-    gen name = "`name'"
 	
     do "${DO}/1_antenatal_care"
     do "${DO}/2_delivery_care"
@@ -121,7 +125,7 @@ save `birth',replace
 }
 capture confirm file "${INTER}/`name'birth.dta"
 if _rc != 0 { // some survey have no child data, generate all child related variables as missing 
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 	local varlist c_anc	c_anc_any	c_anc_bp	c_anc_bp_q	c_anc_bs	c_anc_bs_q	c_anc_ear	c_anc_ear_q	c_anc_eff	c_anc_eff_q	///	
 	c_anc_eff2	c_anc_eff2_q	c_anc_eff3	c_anc_eff3_q	c_anc_ir	c_anc_ir_q	c_anc_ski	c_anc_ski_q	c_anc_tet	c_anc_tet_q	///
 	c_anc_ur c_anc_ur_q	c_caesarean	c_earlybreast	c_facdel	c_hospdel	c_sba	c_sba_eff1	c_sba_eff1_q	c_sba_eff2	///
@@ -138,7 +142,7 @@ use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear
 	
 	recode v106 (0 = 1) (1 =2) (2/3 = 3) (8 = .),gen(w_mateduc)
 	label define w_label 1 "none" 2 "primary" 3 "lower sec or higher"
-	label values w_mateduc w_label */
+	label values w_mateduc w_label
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_*
@@ -148,7 +152,7 @@ save `birth',replace
 ******************************
 *****domains using ind data***
 ******************************
-use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear	
+use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear	
 gen name = "`name'"
 
     do "${DO}/4_sexual_health"
@@ -175,7 +179,7 @@ save `ind'
 ************************************
 *****domains using hm level data****
 ************************************
-use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'hm.dta", clear
 gen name = "`name'"
 
     do "${DO}/9_child_anthropometrics"  
@@ -193,9 +197,9 @@ keep hv001 hv002 hvidx hc70 hc71 ///
 c_* ant_* a_* hm_* ln
 save `hm'
 
-capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
+capture confirm file "${SOURCE}/AIS-`name'/AIS-`name'hiv.dta"
  if _rc==0 {
-    use "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta", clear
+    use "${SOURCE}/AIS-`name'/AIS-`name'hiv.dta", clear
 	gen name = "`name'"
     do "${DO}/12_hiv"
  }
@@ -214,7 +218,7 @@ save `hm',replace
 ************************************
 *****domains using hh level data****
 ************************************
-use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+use "${SOURCE}/AIS-`name'/AIS-`name'hm.dta", clear
 	gen name = "`name'"
 	if inlist(name,"Coted'Ivoire2005"){
 		gen hm_shstruct = shstruct
@@ -241,7 +245,7 @@ save `iso'
 ***merge all subset of microdata
 use `hm',clear
 
-    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //DHSsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
+    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //AISsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
 	
 	bysort hv001 hm_shstruct hv002: egen min = min(w_sampleweight)
 	replace w_sampleweight = min if w_sampleweight ==.
