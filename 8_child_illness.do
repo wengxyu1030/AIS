@@ -33,7 +33,10 @@
 		
 *c_fever	Child with a fever in last two weeks
 	gen c_fever = .
-
+	
+if inlist(name, "Guyana2005"){
+replace c_fever = (h22 == 1) if !inlist(h22,.,8,9)
+}
 
 *c_sevdiarrhea	Child with severe diarrhea
 	g c_sevdiarrhea = .
@@ -58,6 +61,30 @@
 
 *c_fevertreat	Child with fever symptoms seen by formal provider	
 	gen c_fevertreat = .
+	
+order h32a-h32x,sequential	
+		
+if inlist(name,"Guyana2005") {
+		foreach var of varlist h32a-h32x {
+                 local lab: variable label `var' 
+        replace `var' = . if ///   				 
+		regexm("`lab'","(other|shop|pharmacy|market|kiosk|relative|friend|church|drug|addo|hilot|traditional|cs private medical|cs public sector|no treatment)") ///
+                 & !regexm("`lab'","(ngo|hospital|medical center|traditional practioner$|sub health center|health center|aid post|trained vhv and other government|maternity home|diagnostic center|wome('s|n's) consultation|(pol|po)yclinic|fap|emergency services|ambulatory/family doctor office)")  
+		replace `var' = . if !inlist(`var',0,1)
+                 /* do not consider formal if contain words in the first group but don't contain any words in the second group */
+       }
+       egen pro_ari = rowtotal(h32a-h32x),mi
+
+		foreach var of varlist c_treatARI c_treatARI2 {
+        replace `var' = 1 if `var' == 0 & pro_ari >= 1 
+        replace `var'  = . if pro_ari == . 	
+		}
+		
+		replace c_fevertreat = 0 if c_fever == 1
+		replace c_fevertreat = 1 if c_fevertreat == 0 & pro_ari >= 1
+		replace c_fevertreat = . if pro_ari == .
+}
+
 			
 *c_illness/c_illness2	Child with any illness symptoms in last two weeks
 	gen c_illness =.

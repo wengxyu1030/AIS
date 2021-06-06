@@ -41,7 +41,7 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
 
-global AIScountries "CotedIvoire2005"
+global AIScountries "Guyana2005"
 	
 foreach name in $AIScountries{	
 clear
@@ -74,7 +74,10 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
+	gen name = "`name'"
+	if !inlist(name, "Guyana2005"){
 	label value m15 m15_1
+	}
 	
 save "${INTER}/`name'birth.dta",replace
 }
@@ -83,7 +86,6 @@ capture confirm file "${INTER}/`name'birth.dta"
 if _rc == 0 {
 use "${INTER}/`name'birth.dta",clear
     gen hm_age_mon = (v008 - b3)           //hm_age_mon Age in months (children only)
-    gen name = "`name'"
 	
     do "${DO}/1_antenatal_care"
     do "${DO}/2_delivery_care"
@@ -247,7 +249,7 @@ save `iso'
 ***merge all subset of microdata
 use `hm',clear
 
-    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //DHSsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
+    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //AISsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
 	
 	bysort hv001 hm_shstruct hv002: egen min = min(w_sampleweight)
 	replace w_sampleweight = min if w_sampleweight ==.
