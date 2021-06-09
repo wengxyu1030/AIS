@@ -37,7 +37,7 @@ global DO "/Users/sunyining/Dropbox/GitHub/AIS"
 
 do "${DO}/0_GLOBAL.do"
 
-global AIScountries "CotedIvoire2005"
+global AIScountries "Mozambique2009"
 	
 foreach name in $AIScountries{	
 clear
