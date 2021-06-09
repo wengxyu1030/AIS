@@ -18,24 +18,29 @@ macro drop _all
 
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
-//global root "C:\Users\wb500886\WBG\Sven Neelsen - World Bank\MEASURE UHC DATA"
-global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+* Define root depend on the stata user. 
+if "`c(username)'" == "sunyining" local pc = 0
+if "`c(username)'" == "xweng"     local pc = 1
+
+if `pc' == 0 global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
+if `pc' == 1 global root "C:/Users/XWeng/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "/Users/sunyining/OneDrive/MEASURE UHC DATA/RAW DATA/AIS"
+global SOURCE "${root}/RAW DATA/AIS"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
 
 * Define path for INTERMEDIATE
-global INTER "/Users/sunyining/OneDrive/MEASURE UHC DATA/STATA/DATA/SC/INTER"
+global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 0 global DO "/Users/sunyining/Dropbox/GitHub/AIS"
+if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 
 * Define the country names (in globals) in by Recode
-
 do "${DO}/0_GLOBAL.do"
+
 
 global AIScountries "Mozambique2009"
 	
@@ -70,7 +75,10 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
+	gen name = "`name'"
+	if !inlist(name, "Guyana2005"){
 	label value m15 m15_1
+	}
 	
 save "${INTER}/`name'birth.dta",replace
 }
@@ -79,7 +87,6 @@ capture confirm file "${INTER}/`name'birth.dta"
 if _rc == 0 {
 use "${INTER}/`name'birth.dta",clear
     gen hm_age_mon = (v008 - b3)           //hm_age_mon Age in months (children only)
-    gen name = "`name'"
 	
     do "${DO}/1_antenatal_care"
     do "${DO}/2_delivery_care"
@@ -243,7 +250,7 @@ save `iso'
 ***merge all subset of microdata
 use `hm',clear
 
-    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //DHSsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
+    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update      //AISsing update is zero, non DHSsing conflict for all matched.(hvidx different) 
 	
 	bysort hv001 hm_shstruct hv002: egen min = min(w_sampleweight)
 	replace w_sampleweight = min if w_sampleweight ==.
