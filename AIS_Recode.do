@@ -37,7 +37,7 @@ global DO "/Users/sunyining/Dropbox/GitHub/AIS"
 
 do "${DO}/0_GLOBAL.do"
 
-global AIScountries "CotedIvoire2005"
+global AIScountries "Mozambique2015"
 	
 foreach name in $AIScountries{	
 clear
@@ -70,7 +70,7 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
-	label value m15 m15_1
+	label value m15 M15_1
 	
 save "${INTER}/`name'birth.dta",replace
 }
