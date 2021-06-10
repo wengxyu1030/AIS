@@ -9,8 +9,12 @@ gen year = regexs(1) if regexm(country_year, "([0-9][0-9][0-9][0-9])[\-]*[0-9]*[
 destring year, replace
 gen country = regexs(1) if regexm(country_year, "([a-zA-Z]+)")
 
-
+gen sba_skill = .
+gen c_hospdel = .
+gen c_facdel = .
+	
  *sba_skill (not nailed down yet, need check the result and update key words accordingly.)
+ if !inlist(name, "Guyana2005"){
 	foreach var of varlist m3a-m3m {
 
 	local lab: variable label `var' 
@@ -24,14 +28,15 @@ gen country = regexs(1) if regexm(country_year, "([a-zA-Z]+)")
 
 	/* do consider as skilled if contain words in the first group but don't contain any words in the second group */
 
-	egen sba_skill = rowtotal(m3a-m3m),mi
+	replace sba_skill = rowtotal(m3a-m3m),mi
 
 	*c_hospdel: child born in hospital of births in last 2 years
+
 
 	decode m15, gen(m15_lab)
 	replace m15_lab = lower(m15_lab)
 	
-	gen c_hospdel = 0 if !mi(m15)
+	replace c_hospdel = 0 if !mi(m15)
 	replace c_hospdel = 1 if ///
     regexm(m15_lab,"medical college|surgical") | ///
 	regexm(m15_lab,"hospital") & !regexm(m15_lab,"sub-center")
@@ -39,11 +44,12 @@ gen country = regexs(1) if regexm(country_year, "([a-zA-Z]+)")
 	// please check this indicator in case it's country specific
 
 	*c_facdel: child born in formal health facility of births in last 2 years
-	gen c_facdel = 0 if !mi(m15)
+	replace c_facdel = 0 if !mi(m15)
 	replace c_facdel = 1 if regexm(m15_lab,"hospital|maternity|health center|dispensary") | ///
 	!regexm(m15_lab,"home|other private|other$|pharmacy|non medical|private nurse|religious|abroad|india|other public|tba")
 	replace c_facdel = . if mi(m15) | m15 == 99 | mi(m15_lab)
-	
+	}
+
 	*c_earlybreast: child breastfed within 1 hours of birth of births in last 2 years
 	g c_earlybreast = .
 
@@ -59,9 +65,13 @@ gen country = regexs(1) if regexm(country_year, "([a-zA-Z]+)")
 	gen c_sba_q = (c_skin2skin == 1 & c_earlybreast == 1) if c_sba == 1
 	replace c_sba_q = . if c_skin2skin == . | c_earlybreast == .
 	
-	*c_caesarean: Last birth in last 2 years delivered through caesarean                    
+	*c_caesarean: Last birth in last 2 years delivered through caesarean      
+	
+	gen c_caesarean = .
+	if !inlist(name, "Guyana2005"){
 	clonevar c_caesarean = m17
 	replace c_caesarean = . if m17 == 8
+	}
 	
     *c_sba_eff1: Effective delivery care (baby delivered in facility, by skilled provider, mother and child stay in facility for min. 24h, breastfeeding initiated in first 1h after birth)
 	//g c_sba_eff1 = . 
