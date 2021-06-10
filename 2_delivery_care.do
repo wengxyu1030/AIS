@@ -27,8 +27,10 @@ gen c_facdel = .
 	 }
 
 	/* do consider as skilled if contain words in the first group but don't contain any words in the second group */
+	
+	drop sba_skill
 
-	replace sba_skill = rowtotal(m3a-m3m),mi
+	egen sba_skill = rowtotal(m3a-m3m),mi
 
 	*c_hospdel: child born in hospital of births in last 2 years
 
