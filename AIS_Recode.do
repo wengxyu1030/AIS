@@ -41,8 +41,9 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
 
+
 global AIScountries "Mozambique2015"
-	
+
 foreach name in $AIScountries{	
 clear
 tempfile birth ind men hm hiv hh iso
