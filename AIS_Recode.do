@@ -41,7 +41,8 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
 
-global AIScountries "Guyana2005"
+
+global AIScountries "Mozambique2009"
 	
 foreach name in $AIScountries{	
 clear
