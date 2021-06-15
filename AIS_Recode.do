@@ -23,7 +23,7 @@ if "`c(username)'" == "sunyining" local pc = 0
 if "`c(username)'" == "xweng"     local pc = 1
 
 if `pc' == 0 global root "/Users/sunyining/OneDrive/MEASURE UHC DATA"
-if `pc' == 1 global root "C:/Users/XWeng/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
+if `pc' == 1 global root "C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA"
 
 * Define path for data sources
 global SOURCE "${root}/RAW DATA/AIS"
@@ -42,8 +42,8 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 do "${DO}/0_GLOBAL.do"
 
 
-global AIScountries "Mozambique2009"
-	
+global AIScountries "Mozambique2015"
+
 foreach name in $AIScountries{	
 clear
 tempfile birth ind men hm hiv hh iso
@@ -60,12 +60,15 @@ if _rc == 0 {
 			ren `var' `a'
 		}
 	}
-
+	
+	labmask m15_1, values(m15_1)
+	
 	global namenew
 	foreach var of varlist *_1{
 		local a = subinstr("`var'","_1","_@",.)
 		global namenew $namenew `a'
 	}
+
 
 	sreshape long $namenew ,  i(caseid) j(bid)
 
@@ -75,10 +78,12 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
+
 	gen name = "`name'"
 	if !inlist(name, "Guyana2005"){
 	label value m15 m15_1
 	}
+
 	
 save "${INTER}/`name'birth.dta",replace
 }
