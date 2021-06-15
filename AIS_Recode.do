@@ -59,12 +59,15 @@ if _rc == 0 {
 			ren `var' `a'
 		}
 	}
-
+	
+	labmask m15_1, values(m15_1)
+	
 	global namenew
 	foreach var of varlist *_1{
 		local a = subinstr("`var'","_1","_@",.)
 		global namenew $namenew `a'
 	}
+
 
 	sreshape long $namenew ,  i(caseid) j(bid)
 
@@ -77,7 +80,7 @@ if _rc == 0 {
 
 	gen name = "`name'"
 	if !inlist(name, "Guyana2005"){
-	label value m15 M15_1
+	label value m15 m15_1
 	}
 
 	
