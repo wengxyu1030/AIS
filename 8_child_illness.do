@@ -35,7 +35,7 @@ if !inlist(name, "Mozambique2015"){
 *c_fever	Child with a fever in last two weeks
 	gen c_fever = .
 	
-	if inlist(name, "Guyana2005", "Tanzania2012"){
+	if inlist(name, "Guyana2005", "Tanzania2007","Tanzania2012"){
 		replace c_fever = (h22 == 1) if !inlist(h22,.,8,9)
 	}
 
@@ -65,7 +65,7 @@ if !inlist(name, "Mozambique2015"){
 	
 	order h32a-h32x,sequential	
 		
-	if inlist(name,"Guyana2005", "Tanzania2012") {
+	if inlist(name,"Guyana2005", "Tanzania2007","Tanzania2012") {
 		foreach var of varlist h32a-h32x {
                  local lab: variable label `var' 
         replace `var' = . if ///   				 
