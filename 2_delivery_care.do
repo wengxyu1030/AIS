@@ -69,8 +69,12 @@ if inlist(name, "Guyana2005"){
 	replace c_sba_q = . if c_skin2skin == . | c_earlybreast == .
 	
 	*c_caesarean: Last birth in last 2 years delivered through caesarean      
+
+	if inlist(name, "Tanzania2012"){
+	gen c_caesarean = .
+	}
 	
-	if !inlist(name, "Guyana2005"){
+	if !inlist(name, "Guyana2005", "Tanzania2012"){
 	clonevar c_caesarean = m17
 	replace c_caesarean = . if m17 == 8
 	}
