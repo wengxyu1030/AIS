@@ -35,9 +35,9 @@ if !inlist(name, "Mozambique2015"){
 *c_fever	Child with a fever in last two weeks
 	gen c_fever = .
 	
-if inlist(name, "Guyana2005"){
-replace c_fever = (h22 == 1) if !inlist(h22,.,8,9)
-}
+	if inlist(name, "Guyana2005", "Tanzania2007","Tanzania2012"){
+		replace c_fever = (h22 == 1) if !inlist(h22,.,8,9)
+	}
 
 *c_sevdiarrhea	Child with severe diarrhea
 	g c_sevdiarrhea = .
@@ -63,9 +63,9 @@ replace c_fever = (h22 == 1) if !inlist(h22,.,8,9)
 *c_fevertreat	Child with fever symptoms seen by formal provider	
 	gen c_fevertreat = .
 	
-order h32a-h32x,sequential	
+	order h32a-h32x,sequential	
 		
-if inlist(name,"Guyana2005") {
+	if inlist(name,"Guyana2005", "Tanzania2007","Tanzania2012") {
 		foreach var of varlist h32a-h32x {
                  local lab: variable label `var' 
         replace `var' = . if ///   				 
@@ -84,9 +84,8 @@ if inlist(name,"Guyana2005") {
 		replace c_fevertreat = 0 if c_fever == 1
 		replace c_fevertreat = 1 if c_fevertreat == 0 & pro_ari >= 1
 		replace c_fevertreat = . if pro_ari == .
-}
+	}
 
-			
 *c_illness/c_illness2	Child with any illness symptoms in last two weeks
 	gen c_illness =.
 	gen c_illness2 = .

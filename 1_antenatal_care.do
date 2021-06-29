@@ -2,22 +2,36 @@
 *** Antenatal care *********** 
 ******************************   
 
-gen c_anc =.
-gen c_anc_any =.
-gen c_anc_ear = .
-if !inlist(name, "Guyana2005"){
+if inlist(name, "Guyana2005"){
+	gen c_anc =.
+	gen c_anc_any =.
+	gen c_anc_ear = .
+}
+
+if inlist(name, "Tanzania2012"){
+	gen c_anc =.
+	gen c_anc_any =.
+	
+	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
+	gen c_anc_ear = 0 if m2n!=.   // filter question, m13 based on Women who had seen someone for antenatal care for their last born child
+	replace c_anc_ear = 1 if inrange(m13,0,3)
+	replace c_anc_ear = . if inlist(m13,98,.) & m2n !=1 
+}
+	
+if !inlist(name, "Guyana2005", "Tanzania2012"){
 	*c_anc: 4+ antenatal care visits of births in last 2 years	
-	replace c_anc = (inrange(m14,4,97)) if m14<=97                                                //Last pregnancies in last 2 years of women currently aged 15-49	 
+	gen c_anc = (inrange(m14,4,97)) if m14<=97                                                //Last pregnancies in last 2 years of women currently aged 15-49	 
 	replace c_anc=0 if m2n ==1 & m14>=98 
 	
 	*c_anc_any: any antenatal care visits of births in last 2 years
-	replace c_anc_any = (inrange(m14,1,97)) if m14<=97
+	gen c_anc_any = (inrange(m14,1,97)) if m14<=97
 	
 	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
-	replace c_anc_ear = 0 if m2n!=.   // filter question, m13 based on Women who had seen someone for antenatal care for their last born child
+	gen c_anc_ear = 0 if m2n!=.   // filter question, m13 based on Women who had seen someone for antenatal care for their last born child
 	replace c_anc_ear = 1 if inrange(m13,0,3)
 	replace c_anc_ear = . if inlist(m13,98,.) & m2n !=1 
 	}
+
 	*c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
 	gen c_anc_ear_q = c_anc_ear if c_anc_any==1
 		 
@@ -28,7 +42,7 @@ if !inlist(name, "Guyana2005"){
 
     replace `var' = . if ///
 	!regexm("`lab'","trained") & (!regexm("`lab'","doctor|nurse|midwife|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant|matron|general practitioner|health officer|extension|ob-gy") ///
-	|regexm("`lab'","na^|-na|traditional birth attendant|untrained|unquallified|empirical midwife|box|community|village birth attendant"))
+	|regexm("`lab'","na^|-na|trad.birth attendant|traditional birth attendant|untrained|unquallified|empirical midwife|box|community|village birth attendant"))
 
 	replace `var' = . if !inlist(`var',0,1)
 
