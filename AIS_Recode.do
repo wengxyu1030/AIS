@@ -42,7 +42,7 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 do "${DO}/0_GLOBAL.do"
 
 
-global AIScountries "Tanzania2012"
+global AIScountries "Tanzania2004"
 
 foreach name in $AIScountries{	
 clear
@@ -61,7 +61,10 @@ if _rc == 0 {
 		}
 	}
 	
+	gen name = "`name'"    
+	if !inlist(name, "Tanzania2007"){  /* m15_1 has no obs in this survey*/
 	labmask m15_1, values(m15_1)
+	}
 	
 	global namenew
 	foreach var of varlist *_1{
@@ -79,7 +82,6 @@ if _rc == 0 {
 	
 	drop if b8==. & b5!=0
 
-	gen name = "`name'"
 	if !inlist(name, "Guyana2005"){
 	label value m15 m15_1
 	}
@@ -348,3 +350,4 @@ erase "${INTER}/`name'birth.dta"
 }
 save "${OUT}/DHS-`name'.dta", replace  
 }
+
