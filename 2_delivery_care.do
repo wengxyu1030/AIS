@@ -22,10 +22,10 @@ if inlist(name, "Guyana2005"){
 
 	local lab: variable label `var' 
 
-    replace `var' = . if  ///
-	!regexm("`lab'","trained") & (!regexm("`lab'","doctor|nurse|midwife|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant|general practitioner|matron|health officer|extension|ob-gy") ///
-	|regexm("`lab'","na^|-na|traditional birth attendant|untrained|unquallified|empirical midwife|box|community|village birth attendant"))
-	
+    replace `var' = . if ///
+	regexm("`lab'", "trained traditional birth attendant") | !regexm("`lab'","trained") & (!regexm("`lab'","doctor|nurse|midwife|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|MCH|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant|matron|general practitioner|health officer|extension|ob-gy") ///
+	|regexm("`lab'","na^|-na|trad.birth attendant|traditional birth attendant|untrained|unquallified|empirical midwife|box|community|village birth attendant"))
+
 	replace `var' = . if !inlist(`var',0,1)	
 	 }
 
@@ -42,14 +42,14 @@ if inlist(name, "Guyana2005"){
 	gen c_hospdel = 0 if !mi(m15)
 	replace c_hospdel = 1 if ///
     regexm(m15_lab,"medical college|surgical") | ///
-	regexm(m15_lab,"hospital") & !regexm(m15_lab,"sub-center")
+	regexm(m15_lab,"hospital") & !regexm(m15_lab,"sub-center|in the way to")
 	replace c_hospdel = . if mi(m15) | m15 == 99 | mi(m15_lab)	
 	// please check this indicator in case it's country specific
 
 	*c_facdel: child born in formal health facility of births in last 2 years
 	gen c_facdel = 0 if !mi(m15)
-	replace c_facdel = 1 if regexm(m15_lab,"hospital|maternity|health center|dispensary") | ///
-	!regexm(m15_lab,"home|other private|other$|pharmacy|non medical|private nurse|religious|abroad|india|other public|tba")
+	replace c_facdel = 1 if !regexm(m15_lab,"in the way to") & regexm(m15_lab,"hospital|maternity|health center|dispensary") | ///
+	!regexm(m15_lab,"home|other private|other$|pharmacy|non medical|private nurse|religious|abroad|india|other public|tba|in the way to")
 	replace c_facdel = . if mi(m15) | m15 == 99 | mi(m15_lab)
 	}
 
