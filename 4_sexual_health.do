@@ -20,7 +20,7 @@
 	*w_CPR: Use of modern contraceptive methods of women age 15(!)-49 married or living in union
 	gen w_CPR=.
 	
-	if inlist(name, "Mozambique2009", "Mozambique2015"){
+	if inlist(name, "Mozambique2009", "Mozambique2015", "Uganda2011"){
     replace w_CPR=(v313==3)
     replace w_CPR=. if v313==.
     replace w_CPR=. if v502!=1 
