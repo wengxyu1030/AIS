@@ -61,8 +61,9 @@ if _rc == 0 {
 		}
 	}
 	
-	gen name = "`name'"
-	if !inlist(name, "Uganda2011"){
+
+	gen name = "`name'"    
+	if !inlist(name, "Tanzania2007","Uganda2011"){  /* m15_1 has no obs in this survey*/
 	labmask m15_1, values(m15_1)
 	}
 	
@@ -82,7 +83,7 @@ if _rc == 0 {
 	
 	drop if b8==. & b5!=0
 
-	
+
 	if !inlist(name, "Guyana2005", "Uganda2011"){
 	label value m15 m15_1
 	}
@@ -351,3 +352,4 @@ erase "${INTER}/`name'birth.dta"
 }
 save "${OUT}/DHS-`name'.dta", replace  
 }
+
