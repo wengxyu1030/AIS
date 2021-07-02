@@ -42,7 +42,7 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 do "${DO}/0_GLOBAL.do"
 
 
-global AIScountries "Uganda2011"
+global AIScountries "Vietnam2005"
 
 foreach name in $AIScountries{	
 clear

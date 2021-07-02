@@ -12,7 +12,7 @@
 	replace c_ITN=. if ml0==.                  //Children under 5 in country where malaria is endemic (only in countries with endemic)
 	}
 
-	if inlist(name, "CotedIvoire2005", "Mozambique2009", "Uganda2011") { 
+	if inlist(name, "CotedIvoire2005", "Mozambique2009", "Uganda2011", "Vietnam2005") { 
 	replace c_ITN = (ml101 == 1) 
 	replace c_ITN = . if ml101 == . 
 	}
