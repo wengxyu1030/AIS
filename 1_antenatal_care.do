@@ -32,6 +32,7 @@ if !inlist(name, "Guyana2005", "Tanzania2012"){
 	replace c_anc_ear = . if inlist(m13,98,.) & m2n !=1 
 	}
 
+if !inlist(name, "Uganda2011"){
 	*c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
 	gen c_anc_ear_q = c_anc_ear if c_anc_any==1
 		 
@@ -60,6 +61,40 @@ if !inlist(name, "Guyana2005", "Tanzania2012"){
 	
 	*c_anc_ski_q: antenatal care visit with skilled provider among ANC users for pregnancy of births in last 2 years
 	gen c_anc_ski_q = c_anc_ski if c_anc_any == 1 
+	}
+	
+if inlist(name, "Uganda2011"){
+    *c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
+	gen c_anc_ear_q = c_anc_ear if c_anc_any==1
+		 
+	 *anc_skill: Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife...
+	foreach var of varlist s302a-s302y {
+
+	local lab: variable label `var' 
+	
+    replace `var' = . if ///
+	regexm("`lab'", "trained traditional birth attendant") | !regexm("`lab'","trained") & (!regexm("`lab'","doctor|nurse|midwife|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|MCH|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant|matron|general practitioner|health officer|extension|ob-gy") ///
+	|regexm("`lab'","na^|-na|trad.birth attendant|traditional birth attendant|untrained|unquallified|empirical midwife|box|community|village birth attendant"))
+
+	replace `var' = . if !inlist(`var',0,1)
+
+	 }
+
+	/* do consider as skilled if contain words in the first group but don't contain any words in the second group */
+    egen anc_skill = rowtotal(s302a-s302y),mi
+
+	*c_anc_ski: antenatal care visit with skilled provider for pregnancy of births in last 2 years
+	gen c_anc_ski = .
+
+	replace c_anc_ski = 1 if anc_skill >= 1 & anc_skill!=.
+
+	replace c_anc_ski = 0 if anc_skill == 0
+	
+	*c_anc_ski_q: antenatal care visit with skilled provider among ANC users for pregnancy of births in last 2 years
+	gen c_anc_ski_q = c_anc_ski if c_anc_any == 1 
+
+	}
+	
 	
 	*c_anc_bp: Blood pressure measured during pregnancy of births in last 2 years
 	gen c_anc_bp = .
