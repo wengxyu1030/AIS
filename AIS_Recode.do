@@ -41,9 +41,6 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
 
-
-global AIScountries "Uganda2011"
-
 foreach name in $AIScountries{	
 clear
 tempfile birth ind men hm hiv hh iso
@@ -63,7 +60,8 @@ if _rc == 0 {
 	
 
 	gen name = "`name'"    
-	if !inlist(name, "Tanzania2007","Uganda2011"){  /* m15_1 has no obs in this survey*/
+
+	if !inlist(name, "Tanzania2007", "Uganda2011"){  /* m15_1 has no obs in this survey*/
 	labmask m15_1, values(m15_1)
 	}
 	
@@ -82,7 +80,6 @@ if _rc == 0 {
 	}
 	
 	drop if b8==. & b5!=0
-
 
 	if !inlist(name, "Guyana2005", "Uganda2011"){
 	label value m15 m15_1
