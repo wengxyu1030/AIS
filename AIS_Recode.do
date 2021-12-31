@@ -41,7 +41,7 @@ if `pc' == 1 global DO "${root}/STATA/DO/SC/AIS"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
 
-foreach name in $AIScountries{	
+foreach name in $AIScountries {
 clear
 tempfile birth ind men hm hiv hh iso
 
@@ -58,10 +58,9 @@ if _rc == 0 {
 		}
 	}
 	
-
 	gen name = "`name'"    
 
-	if !inlist(name, "Tanzania2007", "Uganda2011"){  /* m15_1 has no obs in this survey*/
+	if !inlist(name, "Tanzania2007", "Uganda2011","Guyana2005"){  /* m15_1 has no obs in this survey*/
 	labmask m15_1, values(m15_1)
 	}
 	
@@ -141,10 +140,10 @@ use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 	c_anc_eff2	c_anc_eff2_q	c_anc_eff3	c_anc_eff3_q	c_anc_ir	c_anc_ir_q	c_anc_ski	c_anc_ski_q	c_anc_tet	c_anc_tet_q	///
 	c_anc_ur c_anc_ur_q	c_caesarean	c_earlybreast	c_facdel	c_hospdel	c_sba	c_sba_eff1	c_sba_eff1_q	c_sba_eff2	///
 	c_sba_eff2_q c_sba_q	c_skin2skin	c_pnc_any	c_pnc_eff	c_pnc_eff_q	c_pnc_eff2	c_pnc_eff2_q	c_bcg	c_dpt1	c_dpt2	///
-	c_dpt3	c_fullimm c_measles c_polio1	c_polio2	c_polio3	c_ari	c_ari2	c_diarrhea 	c_diarrhea_hmf	c_diarrhea_med ///	
+	c_dpt3	c_fullimm c_measles c_polio1	c_polio2	c_polio3 c_vaczero c_ari	c_ari2	c_diarrhea 	c_diarrhea_hmf	c_diarrhea_med ///	
 	c_diarrhea_medfor c_diarrhea_mof	c_diarrhea_pro	c_diarrheaact	c_diarrheaact_q	c_fever	c_fevertreat	c_illness	c_illtreat ///
 	c_sevdiarrhea c_sevdiarrheatreat	c_sevdiarrheatreat_q	c_treatARI	c_treatARI2	c_treatdiarrhea	c_illness2	c_illtreat2  ///
-	mor_ade	mor_afl	mor_ali	mor_dob mor_wln bidx  hm_age_mon c_ITN hm_live hm_dob hm_age_yrs hm_male hm_doi 
+	mor_ade	mor_afl	mor_ali	mor_dob mor_wln bidx  hm_age_mon c_ITN hm_live hm_dob hm_age_yrs hm_male hm_doi hm_birthorder c_magebrt
 	
 	foreach i of local varlist{
 			gen `i' = . 
@@ -156,7 +155,7 @@ use "${SOURCE}/AIS-`name'/AIS-`name'ind.dta", clear
 	label values w_mateduc w_label
 	cap gen hm_shstruct =999
 rename (v001 v002 v003) (hv001 hv002 hvidx)
-keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_*
+keep hv001 hv002 hvidx bidx c_* mor_*  hm_shstruct w_* hm_*
 save `birth',replace
 }
 
@@ -204,7 +203,7 @@ gen name = "`name'"
 		order  hhid hvidx hv000 hm_shstruct hv001 hv002
 	}	
 	cap gen hm_shstruct =999
-keep hv001 hv002 hvidx hc70 hc71 ///
+keep hv001 hv002 hvidx hc70 hc71 hc72 ///
 c_* ant_* a_* hm_* ln
 save `hm'
 
@@ -314,7 +313,7 @@ use `hm',clear
 
 	***for variables generated from 7_child_vaccination
 	foreach var of var c_bcg c_dpt1 c_dpt2 c_dpt3 c_fullimm c_measles ///
-	c_polio1 c_polio2 c_polio3{
+	c_polio1 c_polio2 c_polio3 c_vaczero {
     replace `var' = . if !inrange(hm_age_mon,15,23)
     }
 
@@ -326,7 +325,7 @@ use `hm',clear
     }
 	
 	***for variables generated from 9_child_anthropometrics
-	foreach var of var c_underweight c_stunted	hc70 hc71 ant_sampleweight{
+	foreach var of var c_underweight c_stunted c_stu_was c_stu_was_sev hc70 hc71 hc72 ant_sampleweight{
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 	
@@ -339,14 +338,21 @@ use `hm',clear
     foreach var of var a_diab_treat  a_inpatient_1y a_bp_treat a_bp_sys a_bp_dial a_hi_bp140_or_on_med a_bp_meas{
 	replace `var'=. if hm_age_yrs<18
 	}
+	
+	
 *** Label variables
     drop bidx surveyid
+	
+	rename hc71 c_wfa
+	rename hc70 c_hfa
+	rename hc72 c_wfh
+	
     do "${DO}/Label_var"
 	
 capture confirm file "${INTER}/`name'birth.dta"
 if _rc == 0 {
 erase "${INTER}/`name'birth.dta"
 }
-save "${OUT}/DHS-`name'.dta", replace  
+save "${OUT}/AIS-`name'.dta", replace  
 }
 

@@ -10,20 +10,20 @@
 #delimit ;
 global AIScountries
 "
-Congo2009
-CotedIvoire2005
 Guyana2005
+CotedIvoire2005
+Congo2009
 Mozambique2015
 Mozambique2009
-Tanzania2011
+Tanzania2012
 Tanzania2007
-Tanzania2003
+Tanzania2004
 Uganda2011
-Uganda2004
 Vietnam2005
 ";
 #delimit cr
 
+//not working:  
 
 **********************************
 *** 	 MIS countries	 	  ****

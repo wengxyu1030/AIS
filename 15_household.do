@@ -45,5 +45,14 @@
 *hv003 Respondent's line number in household roster (original)
 	cap gen hm_shstruct =999 
 
+*hh_religion: religion of household head (DW Team Nov 2021)
+	cap clonevar hh_religion = v130
+
+*hh_watersource: Water source (hv201 in DHS HH dataset, already coded for MICS)
+	clonevar hh_watersource = hv201
+	
+*hh_toilet: Toilet type (hv205 “”, already coded for MICS)
+	clonevar hh_toilet = hv205
+	
 duplicates drop hv001 hm_shstruct hv002,force
 	

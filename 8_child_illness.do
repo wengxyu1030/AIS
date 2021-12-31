@@ -62,10 +62,9 @@ if !inlist(name, "Mozambique2015"){
 
 *c_fevertreat	Child with fever symptoms seen by formal provider	
 	gen c_fevertreat = .
-	
-	order h32a-h32x,sequential	
-		
+
 	if inlist(name,"Guyana2005", "Tanzania2007","Tanzania2012") {
+	    order h32a-h32x,sequential	
 		foreach var of varlist h32a-h32x {
                  local lab: variable label `var' 
         replace `var' = . if ///   				 

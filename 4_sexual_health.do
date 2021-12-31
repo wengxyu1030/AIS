@@ -83,6 +83,11 @@
 	 replace w_need_fp = . if v502 != 1  // currently married or in union women
 	}
 	
+	* w_married: 1 if woman and mother currently married or living in union, 0 otherwise (v501 in DHS and ma1 in MICS woman dataset) – i.e. have it for both woman and child level observations ; coded no response as .
+		gen w_married = .
+		replace w_married = 1 if inlist(v501,1,2)
+		replace w_married = 0 if !inlist(v501,1,2) & v501 != .
+	
 /*	
 	 tempfile temp1 temp2 temp3
 	 
