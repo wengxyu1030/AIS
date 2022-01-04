@@ -270,7 +270,7 @@ use `hm',clear
     tab hh_urban,mi  //check whether all hh member + dead child + child lives outside hh assinged hh info
 
 ***survey level data
-    gen survey = "DHS-`name'"
+    gen survey = "AIS-`name'"
 	gen year = real(substr("`name'",-4,.))
 	tostring(year),replace
     gen country = regexs(0) if regexm("`name'","([a-zA-Z]+)")
