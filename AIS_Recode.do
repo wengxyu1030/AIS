@@ -29,7 +29,7 @@ if `pc' == 1 global root "C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA"
 global SOURCE "${root}/RAW DATA/AIS"
 
 * Define path for output data
-global OUT "${root}/STATA/DATA/SC/FINAL"
+global OUT "${root}/STATA/DATA/SC/AIS"
 
 * Define path for INTERMEDIATE
 global INTER "${root}/STATA/DATA/SC/INTER"
